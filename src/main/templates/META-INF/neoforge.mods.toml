@@ -15,9 +15,6 @@ credits="shedaniel (Fabric Author)"
 authors="${mod_authors}"
 description='''${mod_description}'''
 
-[[mixins]]
-config="yosbr.mixins.json"
-
 [[dependencies.${mod_id}]]
 modId="neoforge"
 type="required"

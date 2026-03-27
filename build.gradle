@@ -20,8 +20,13 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+sourceSets {
+    core
+}
+
 neoForge {
     version = project.neo_version
+    addModdingDependenciesTo sourceSets.core
 
     parchment {
         mappingsVersion = project.parchment_mappings_version
@@ -53,13 +58,24 @@ neoForge {
     }
 }
 
+def coreJar = tasks.register("coreJar", Jar) {
+    from(sourceSets.core.output)
+    archiveClassifier = "core"
+    manifest {
+        attributes('FMLModType': 'LIBRARY',
+                   'Automatic-Module-Name': "${mod_id}_neo_core")
+    }
+}
+
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
-dependencies {}
+dependencies {
+    implementation(jarJar files(coreJar))
+}
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
