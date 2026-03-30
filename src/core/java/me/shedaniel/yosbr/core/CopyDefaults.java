@@ -16,7 +16,7 @@ public class CopyDefaults {
         if (initialized) return; // NeoForge constructs language loaders twice; first when counting and when actually loading
         initialized = true;
 
-        YOSBRLanguageLoader.LOGGER.info("Applying default options... (YOSBR)");
+        YOSBRLanguageLoader.LOGGER.info("Applying default options...");
         try {
             File yosbr = new File(CONFIG_DIR, "yosbr");
             if (!yosbr.exists() && !yosbr.mkdirs()) {
@@ -29,6 +29,7 @@ public class CopyDefaults {
             if (!config.exists() && !config.mkdirs()) {
                 throw new IllegalStateException("Could not create directory: " + config.getAbsolutePath());
             }
+
             Files.walk(yosbr.toPath()).forEach(path -> {
                 File file = path.normalize().toAbsolutePath().normalize().toFile();
                 if (!file.isFile()) return;
@@ -39,9 +40,10 @@ public class CopyDefaults {
                             throw new IllegalStateException("Illegal default config file: " + file);
                         applyDefaultOptions(new File(CONFIG_DIR, configRelative.normalize().toString()), file);
                     } catch (IllegalArgumentException e) {
-                        System.out.println(yosbr.toPath().toAbsolutePath().normalize());
-                        System.out.println(file.toPath().toAbsolutePath().normalize());
-                        System.out.println(yosbr.toPath().toAbsolutePath().normalize().relativize(file.toPath().toAbsolutePath().normalize()));
+                        YOSBRLanguageLoader.LOGGER.error("Failed to find path: ");
+                        YOSBRLanguageLoader.LOGGER.error(yosbr.toPath().toAbsolutePath().normalize());
+                        YOSBRLanguageLoader.LOGGER.error(file.toPath().toAbsolutePath().normalize());
+                        YOSBRLanguageLoader.LOGGER.error(yosbr.toPath().toAbsolutePath().normalize().relativize(file.toPath().toAbsolutePath().normalize()));
                         applyDefaultOptions(new File(RUN_DIR, yosbr.toPath().toAbsolutePath().normalize().relativize(file.toPath().toAbsolutePath().normalize()).normalize().toString()), file);
                     }
                 } catch (IOException e) {
@@ -57,16 +59,19 @@ public class CopyDefaults {
         if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
             throw new IllegalStateException("Could not create directory: " + file.getParentFile().getAbsolutePath());
         }
+
         if (!defaultFile.getParentFile().exists() && !defaultFile.getParentFile().mkdirs()) {
             throw new IllegalStateException("Could not create directory: " + defaultFile.getParentFile().getAbsolutePath());
         }
+
         if (!defaultFile.exists()) {
             //noinspection ResultOfMethodCallIgnored
             defaultFile.createNewFile();
             return;
         }
+
         if (file.exists()) return;
-        YOSBRLanguageLoader.LOGGER.info("Applying default options for {}{} from {}{}",
+        YOSBRLanguageLoader.LOGGER.debug("Applying default options for {}{} from {}{}",
                 File.separator, RUN_DIR.toPath().toAbsolutePath().normalize().relativize(file.toPath().toAbsolutePath().normalize()).normalize().toString(),
                 File.separator, RUN_DIR.toPath().toAbsolutePath().normalize().relativize(defaultFile.toPath().toAbsolutePath().normalize()).normalize().toString());
         Files.copy(defaultFile.toPath(), file.toPath());
